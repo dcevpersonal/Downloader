@@ -44,3 +44,5 @@ for x in pbar:
 
 
 print("Download completed")
+
+input("Close")
