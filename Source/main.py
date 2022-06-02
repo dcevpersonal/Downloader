@@ -1,4 +1,5 @@
 import os.path
+from os.path import exists
 from youtubesearchpython import VideosSearch
 from tqdm import tqdm;
 from pytube import YouTube, Playlist
@@ -13,13 +14,14 @@ def YouTubeMusicDownload():
     pbar = tqdm([m.title], desc="Downloading")
     for x in pbar:
         yd = m.streams.get_audio_only()
+
         pbar.set_description("Downloading- " + m.title)
         song = yd.download(output_path="./ytsongs/")
 
         # Convert To MP3
         base, ext = os.path.splitext(song)
         new_file = base + ".mp3"
-        os.rename(song, new_file)
+        os.replace(song, new_file)
 
     print('\u001b[32m' + "Download completed")
 
@@ -29,8 +31,10 @@ def YouTubeVideoDownload():
     v = YouTube(name)
     pbar = tqdm([v.title], desc="Downloading")
     for x in pbar:
+
         pbar.set_description("Downloading- " + v.title)
         v.streams.get_highest_resolution().download(output_path="./ytvideo/")
+
 
 
     print('\u001b[32m' + "Download completed")
@@ -40,10 +44,11 @@ def YouTubePlaylistDownload():
     playlistName = input("Playlist URl: ")
     p = Playlist(playlistName)
     pbar = tqdm(p.videos, desc="Downloading")
-    for x in pbar:
-        pbar.set_description("Downloading- " + x.title)
-        x.streams.get_highest_resolution().download(output_path="./ytvideos/")
 
+    for x in pbar:
+
+        pbar.set_description("Downloading- " + x.title)
+        x.streams.get_highest_resolution().download(output_path="./ytplaylists/" + p.title )
 
     print('\u001b[32m' + "Download completed")
 
@@ -60,19 +65,19 @@ def SpotifyPlaylistDownload():
     playlist = re.split('\?', playlist)[0]
 
     headers = {'content-type': 'application/json', "Accept": "application/json", "Authorization": "Bearer " + Token}
-    url = 'https://api.spotify.com/v1/playlists/' + playlist + '/tracks'
+    url = 'https://api.spotify.com/v1/playlists/' + playlist
 
     r = requests.get(url=url, headers=headers)
 
     result = r.json()
-
-
-    pbar = tqdm(result['items'], desc="Downloading")
+    playlistName = result['name']
+    pbar = tqdm(result['tracks']['items'], desc="Downloading")
     # Retrieve Song From Playlist
     for x in pbar:
         songName = x['track']['name']
         artistName = []
         fullName = "";
+
         for y in x['track']['artists']:
             artistName.append(y['name']);
         for z in artistName:
@@ -86,14 +91,13 @@ def SpotifyPlaylistDownload():
         ys = yt.streams.get_audio_only()
 
         pbar.set_description("Downloading- " + fullName)
-
         # Download
-        song = ys.download(output_path="./spotifysongs/")
+        song = ys.download(output_path="./spotifysongs/" + playlistName)
 
         # Convert To MP3
         base, ext = os.path.splitext(song)
         new_file = base + ".mp3"
-        os.rename(song, new_file)
+        os.replace(song, new_file)
 
     print('\u001b[32m' + "Download completed")
 
