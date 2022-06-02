@@ -1,11 +1,11 @@
 import os.path
-from os.path import exists
 from youtubesearchpython import VideosSearch
-from tqdm import tqdm;
+from tqdm import tqdm
 from pytube import YouTube, Playlist
 import requests
 from requests.auth import HTTPBasicAuth
 from InquirerPy import prompt
+from moviepy.video.io.VideoFileClip import VideoFileClip
 import re
 
 def YouTubeMusicDownload():
@@ -13,15 +13,20 @@ def YouTubeMusicDownload():
     m = YouTube(name)
     pbar = tqdm([m.title], desc="Downloading")
     for x in pbar:
-        yd = m.streams.get_audio_only()
+        yd = m.streams.get_highest_resolution()
 
         pbar.set_description("Downloading- " + m.title)
         song = yd.download(output_path="./ytsongs/")
 
         # Convert To MP3
+        videoClip = VideoFileClip(song)
+        audioClip = videoClip.audio
         base, ext = os.path.splitext(song)
         new_file = base + ".mp3"
-        os.replace(song, new_file)
+        audioClip.write_audiofile(new_file, logger=None)
+        audioClip.close()
+        videoClip.close()
+        os.remove(song)
 
     print('\u001b[32m' + "Download completed")
 
@@ -88,16 +93,22 @@ def SpotifyPlaylistDownload():
 
         yt = YouTube(videoLink)
 
-        ys = yt.streams.get_audio_only()
+        ys = yt.streams.get_highest_resolution()
 
         pbar.set_description("Downloading- " + fullName)
         # Download
         song = ys.download(output_path="./spotifysongs/" + playlistName)
 
         # Convert To MP3
+        videoClip = VideoFileClip(song)
+        audioClip = videoClip.audio
         base, ext = os.path.splitext(song)
         new_file = base + ".mp3"
-        os.replace(song, new_file)
+        audioClip.write_audiofile(new_file, logger=None)
+        audioClip.close()
+        videoClip.close()
+        os.remove(song)
+
 
     print('\u001b[32m' + "Download completed")
 
