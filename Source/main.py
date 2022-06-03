@@ -1,4 +1,6 @@
 import os.path
+
+import eyed3
 from youtubesearchpython import VideosSearch
 from tqdm import tqdm
 from pytube import YouTube, Playlist
@@ -7,6 +9,9 @@ from requests.auth import HTTPBasicAuth
 from InquirerPy import prompt
 from moviepy.video.io.VideoFileClip import VideoFileClip
 import re
+import urllib.request
+from eyed3.id3.frames import ImageFrame
+from eyed3.core import Date
 
 def YouTubeMusicDownload():
     name = input("Music Video URL: ")
@@ -77,16 +82,25 @@ def SpotifyPlaylistDownload():
     result = r.json()
     playlistName = result['name']
     pbar = tqdm(result['tracks']['items'], desc="Downloading")
+
     # Retrieve Song From Playlist
     for x in pbar:
         songName = x['track']['name']
         artistName = []
+        playlistArtistName = []
         fullName = "";
+        fullArtistName = "";
+        fullPlaylistArtistName = ""
+
 
         for y in x['track']['artists']:
             artistName.append(y['name']);
+        for n in x['track']['album']['artists']:
+            playlistArtistName.append(n['name'])
         for z in artistName:
-            fullName = songName + " " + z
+            fullArtistName = fullArtistName + " " + z
+
+        fullName = songName + "" + fullArtistName
 
         videosSearch = VideosSearch(fullName, limit=1)
         videoLink = videosSearch.result()['result'][0]['link']
@@ -96,6 +110,7 @@ def SpotifyPlaylistDownload():
         ys = yt.streams.get_highest_resolution()
 
         pbar.set_description("Downloading- " + fullName)
+
         # Download
         song = ys.download(output_path="./spotifysongs/" + playlistName)
 
@@ -109,7 +124,30 @@ def SpotifyPlaylistDownload():
         videoClip.close()
         os.remove(song)
 
+        #Add Meta-Data
+        audioCover = "./spotifysongs/" + playlistName + '/' + songName + ".jpg"
 
+        urllib.request.urlretrieve(x['track']['album']['images'][0]['url'],audioCover)
+        audioFile = eyed3.load(new_file)
+
+        if audioFile.tag == None:
+            audioFile.initTag()
+
+        audioFile.tag.title = songName
+        audioFile.tag.recording_date = Date(int(x['track']['album']['release_date'].split('-')[0]))
+        audioFile.tag.album = x['track']['album']['name']
+        audioFile.tag.images.set(ImageFrame.FRONT_COVER, open(audioCover, 'rb').read(), 'image/jpeg');
+        audioFile.tag.track_num = x['track']['track_number']
+        audioFile.tag.artist = fullArtistName
+        for u in playlistArtistName:
+            fullPlaylistArtistName = fullPlaylistArtistName + "" + u
+        audioFile.tag.album_artist = fullPlaylistArtistName
+
+
+
+
+        audioFile.tag.save()
+        os.remove(audioCover)
     print('\u001b[32m' + "Download completed")
 
 
