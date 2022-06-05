@@ -97,7 +97,7 @@ def spotify_playlist_download():
 
     # Retrieve Song From Playlist
     for x in pbar:
-        song_name = x['track']['name']
+        song_name = re.sub('/', '', x['track']['name'])
         artist_name = []
         playlist_artist_name = []
         full_artist_name = ""
