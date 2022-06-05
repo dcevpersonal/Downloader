@@ -1,5 +1,5 @@
 import os.path
-
+from config import num_threads_settings
 import eyed3
 from youtubesearchpython import VideosSearch
 from tqdm import tqdm
@@ -12,6 +12,12 @@ import re
 import urllib.request
 from eyed3.id3.frames import ImageFrame
 from eyed3.core import Date
+from threading import Thread
+from queue import Queue
+
+import random
+
+th_errors = []
 
 
 def youtube_music_download():
@@ -24,8 +30,6 @@ def youtube_music_download():
         pbar.set_description("Downloading- " + m.title)
         song = yd.download(output_path="./YT-Songs/")
         convert_mp4_mp3(song)
-
-    print('\u001b[32m' + "Download completed")
 
 
 def convert_mp4_mp3(song):
@@ -50,22 +54,45 @@ def youtube_video_download():
         pbar.set_description("Downloading- " + v.title)
         v.streams.get_highest_resolution().download(output_path="./YT-Video/")
 
-    print('\u001b[32m' + "Download completed")
-
 
 def youtube_playlist_download():
     playlist_name = input("Playlist URl: ")
     p = Playlist(playlist_name)
+
+    q = Queue(maxsize=0)
+    num_threads = min(num_threads_settings, len(p))
     pbar = tqdm(p.videos, desc="Downloading")
 
-    for x in pbar:
-        pbar.set_description("Downloading- " + x.title)
-        x.streams.get_highest_resolution().download(output_path="./YT-Playlists/" + p.title)
+    def crawl(que):
+        while not que.empty():
+            try:
+                work = que.get()
+                work[0].streams.get_highest_resolution().download(output_path="./YT-Playlists/" + p.title)
 
-    print('\u001b[32m' + "Download completed")
+            except:
+                th_errors.append(random.seed(5))
+
+        pbar.update(1)
+        que.task_done()
+        return True
+
+    for i in p.videos:
+        q.put((i, p.videos))
+
+    create_threads(num_threads, crawl, q)
+
+    q.join()
+
+
+def create_threads(threads, crawl_f, que):
+    for y in range(threads):
+        worker = Thread(target=crawl_f, args=(que,))
+        worker.setDaemon(True)
+        worker.start()
 
 
 def spotify_playlist_download():
+    # Retrieve Songs From Spotify Playlist
     client_id = os.environ.get("SPOTIFY_ID")
     client_secret = os.environ.get("SPOTIFY_SECRET")
 
@@ -93,61 +120,78 @@ def spotify_playlist_download():
         url = 'https://api.spotify.com/v1/playlists/' + playlist + "/tracks?limit=100&offset=" + str(offset)
         result = requests.get(url=url, headers=headers).json()
 
+    q = Queue(maxsize=0)
+    num_threads = min(num_threads_settings, len(result_output))
     pbar = tqdm(result_output, desc="Downloading")
 
-    # Retrieve Song From Playlist
-    for x in pbar:
-        song_name = re.sub('/', '', x['track']['name'])
-        artist_name = []
-        playlist_artist_name = []
-        full_artist_name = ""
-        full_playlist_artist_name = ""
+    def crawl(que):
 
-        for y in x['track']['artists']:
-            artist_name.append(y['name'])
-        for n in x['track']['album']['artists']:
-            playlist_artist_name.append(n['name'])
-        for z in artist_name:
-            full_artist_name = full_artist_name + " " + z
+        while not que.empty():
+            try:
+                work = que.get()
+                song_name = re.sub(r'[/?.<>|"\\*]', ' ', work[0]['track']['name'])
+                artist_name = []
+                playlist_artist_name = []
+                full_artist_name = ""
+                full_playlist_artist_name = ""
 
-        full_name = song_name + "" + full_artist_name
+                for u in work[0]['track']['artists']:
+                    artist_name.append(u['name'])
+                for n in work[0]['track']['album']['artists']:
+                    playlist_artist_name.append(n['name'])
+                for z in artist_name:
+                    full_artist_name = full_artist_name + " " + z
 
-        videos_search = VideosSearch(full_name, limit=1)
-        video_link = videos_search.result()['result'][0]['link']
+                full_name = song_name + "" + full_artist_name
 
-        yt = YouTube(video_link)
+                videos_search = VideosSearch(full_name, limit=1)
+                video_link = videos_search.result()['result'][0]['link']
 
-        ys = yt.streams.get_highest_resolution()
+                yt = YouTube(video_link)
 
-        pbar.set_description("Downloading- " + full_name)
+                ys = yt.streams.get_highest_resolution()
 
-        # Download
-        song = ys.download(output_path="./Spotify-Songs/" + playlist_name)
+                # Download
+                song = ys.download(output_path="./Spotify-Songs/" + playlist_name)
 
-        new_file = convert_mp4_mp3(song)
+                new_file = convert_mp4_mp3(song)
 
-        # Add Meta-Data
-        audio_cover = "./Spotify-Songs/" + playlist_name + '/' + song_name + ".jpg"
+                # Add Meta-Data
+                audio_cover = "./Spotify-Songs/" + playlist_name + '/' + song_name + ".jpg"
 
-        urllib.request.urlretrieve(x['track']['album']['images'][0]['url'], audio_cover)
-        audio_file = eyed3.load(new_file)
+                urllib.request.urlretrieve(work[0]['track']['album']['images'][0]['url'], audio_cover)
+                audio_file = eyed3.load(new_file)
 
-        if audio_file.tag is None:
-            audio_file.initTag()
+                if audio_file.tag is None:
+                    audio_file.initTag()
 
-        audio_file.tag.title = song_name
-        audio_file.tag.recording_date = Date(int(x['track']['album']['release_date'].split('-')[0]))
-        audio_file.tag.album = x['track']['album']['name']
-        audio_file.tag.images.set(ImageFrame.FRONT_COVER, open(audio_cover, 'rb').read(), 'image/jpeg')
-        audio_file.tag.track_num = x['track']['track_number']
-        audio_file.tag.artist = full_artist_name
-        for u in playlist_artist_name:
-            full_playlist_artist_name = full_playlist_artist_name + "" + u
-        audio_file.tag.album_artist = full_playlist_artist_name
+                audio_file.tag.title = song_name
+                audio_file.tag.recording_date = Date(int(work[0]['track']['album']['release_date'].split('-')[0]))
+                audio_file.tag.album = work[0]['track']['album']['name']
+                audio_file.tag.images.set(ImageFrame.FRONT_COVER, open(audio_cover, 'rb').read(), 'image/jpeg')
+                audio_file.tag.track_num = work[0]['track']['track_number']
+                audio_file.tag.artist = full_artist_name
+                for u in playlist_artist_name:
+                    full_playlist_artist_name = full_playlist_artist_name + "" + u
+                audio_file.tag.album_artist = full_playlist_artist_name
 
-        audio_file.tag.save()
-        os.remove(audio_cover)
-    print('\u001b[32m' + "Download completed")
+                audio_file.tag.save()
+                os.remove(audio_cover)
+
+            except:
+                th_errors.append(random.seed(5))
+
+            pbar.update(1)
+            que.task_done()
+
+        return True
+
+    for i in result_output:
+        q.put((i, result_output))
+
+    create_threads(num_threads, crawl, q)
+
+    q.join()
 
 
 # Prompt
@@ -169,5 +213,8 @@ elif "YouTube Music" in answer[0]:
     youtube_music_download()
 elif "YouTube Playlist" in answer[0]:
     youtube_playlist_download()
+
+print('\u001b[31m' + "Errors: " + str(len(th_errors)))
+print('\u001b[32m' + "Download completed")
 print('\u001b[31m' + "Close")
 input()
