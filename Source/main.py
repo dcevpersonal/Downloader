@@ -73,9 +73,10 @@ def youtube_playlist_download():
             except:
                 global th_errors
                 th_errors.append(random.seed(5))
+            finally:
+                pbar.update(1)
+                que.task_done()
 
-        pbar.update(1)
-        que.task_done()
         return True
 
     for i in p.videos:
@@ -184,8 +185,9 @@ def spotify_playlist_download():
                 global th_errors
                 th_errors.append(random.seed(5))
 
-            pbar.update(1)
-            que.task_done()
+            finally:
+                pbar.update(1)
+                que.task_done()
 
         return True
 
@@ -205,10 +207,10 @@ def main_prompt():
     clear()
     print('\u001b[36m' + r""" 
   ____                      _                 _           
- |  _ \  _____      ___ __ | | __ _  ___   __| | ___ _ __ 
- | | | |/ _ \ \ /\ / / '_ \| |/ _` |/ _ \ / _` |/ _ \ '__|
- | |_| | (_) \ V  V /| | | | | (_| | (_) | (_| |  __/ |   
- |____/ \___/ \_/\_/ |_| |_|_|\__,_|\___/ \__,_|\___|_|   
+ |  _ \  _____      ___ __ | | ___   __ _  __| | ___ _ __ 
+ | | | |/ _ \ \ /\ / / '_ \| |/ _ \ / _` |/ _` |/ _ \ '__|
+ | |_| | (_) \ V  V /| | | | | (_) | (_| | (_| |  __/ |   
+ |____/ \___/ \_/\_/ |_| |_|_|\___/ \__,_|\__,_|\___|_|  
                                                            """)
     questions = [
         {
