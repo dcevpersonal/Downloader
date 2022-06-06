@@ -244,7 +244,7 @@ def setting_prompt():
 
     if answer["name"].isdigit():
         global num_threads_max
-        num_threads_max = answer["name"]
+        num_threads_max = int(answer["name"])
 
     main_prompt()
 
