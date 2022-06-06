@@ -26,7 +26,6 @@ imports:
  &#8226;   <a href="#codecs">codecs</a>
  &#8226;   <a href="#collections">collections</a>
  &#8226;   <a href="#collections.abc">collections.abc</a>
- &#8226;   <a href="#config">config</a>
  &#8226;   <a href="#copyreg">copyreg</a>
  &#8226;   <a href="#encodings">encodings</a>
  &#8226;   <a href="#encodings.aliases">encodings.aliases</a>
@@ -1550,6 +1549,8 @@ imported by:
 imports:
     <a href="#PIL">PIL</a>
  &#8226;   <a href="#PIL.BmpImagePlugin">PIL.BmpImagePlugin</a>
+ &#8226;   <a href="#PIL.ExifTags">PIL.ExifTags</a>
+ &#8226;   <a href="#PIL.FitsImagePlugin">PIL.FitsImagePlugin</a>
  &#8226;   <a href="#PIL.GifImagePlugin">PIL.GifImagePlugin</a>
  &#8226;   <a href="#PIL.GimpGradientFile">PIL.GimpGradientFile</a>
  &#8226;   <a href="#PIL.GimpPaletteFile">PIL.GimpPaletteFile</a>
@@ -1844,7 +1845,8 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#imageio.plugins.pillow">imageio.plugins.pillow</a>
+    <a href="#PIL">PIL</a>
+ &#8226;   <a href="#imageio.plugins.pillow">imageio.plugins.pillow</a>
  &#8226;   <a href="#imageio.plugins.pillow_legacy">imageio.plugins.pillow_legacy</a>
 
   </div>
@@ -1864,7 +1866,8 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#PIL.FitsStubImagePlugin">PIL.FitsStubImagePlugin</a>
+    <a href="#PIL">PIL</a>
+ &#8226;   <a href="#PIL.FitsStubImagePlugin">PIL.FitsStubImagePlugin</a>
  &#8226;   <a href="#PIL.Image">PIL.Image</a>
 
   </div>
@@ -8147,17 +8150,6 @@ imports:
   <div class="import">
 imported by:
     <a href="#concurrent.futures">concurrent.futures</a>
-
-  </div>
-
-</div>
-
-<div class="node">
-  <a name="config"></a>
-  <a target="code" href="///D:/General/Downloads/Projects/Downloader/Source/config.py" type="text/plain"><tt>config</tt></a>
-<span class="moduletype">SourceModule</span>  <div class="import">
-imported by:
-    <a href="#main.py">main.py</a>
 
   </div>
 
@@ -16832,6 +16824,7 @@ imports:
     <a href="#imageio">imageio</a>
  &#8226;   <a href="#imageio.plugins">imageio.plugins</a>
  &#8226;   <a href="#imageio.plugins._dicom">imageio.plugins._dicom</a>
+ &#8226;   <a href="#imageio.plugins._tifffile">imageio.plugins._tifffile</a>
  &#8226;   <a href="#importlib">importlib</a>
  &#8226;   <a href="#os">os</a>
  &#8226;   <a href="#sys">sys</a>
@@ -17030,6 +17023,7 @@ imports:
   <div class="import">
 imported by:
     <a href="#imageio">imageio</a>
+ &#8226;   <a href="#imageio.plugins">imageio.plugins</a>
  &#8226;   <a href="#imageio.plugins.tifffile">imageio.plugins.tifffile</a>
 
   </div>
@@ -17732,7 +17726,7 @@ imports:
  &#8226;   <a href="#importlib._bootstrap">importlib._bootstrap</a>
  &#8226;   <a href="#importlib._bootstrap_external">importlib._bootstrap_external</a>
  &#8226;   <a href="#importlib._common">importlib._common</a>
- &#8226;   <a href="#importlib.abc">importlib.abc</a>
+ &#8226;   <a href="#importlib.machinery">importlib.machinery</a>
  &#8226;   <a href="#sys">sys</a>
  &#8226;   <a href="#types">types</a>
  &#8226;   <a href="#warnings">warnings</a>
@@ -17870,7 +17864,6 @@ imports:
   <div class="import">
 imported by:
     <a href="#_distutils_hack">_distutils_hack</a>
- &#8226;   <a href="#importlib">importlib</a>
  &#8226;   <a href="#importlib.metadata">importlib.metadata</a>
  &#8226;   <a href="#importlib.resources">importlib.resources</a>
  &#8226;   <a href="#importlib.util">importlib.util</a>
@@ -17898,6 +17891,7 @@ imported by:
  &#8226;   <a href="#PyInstaller.lib.modulegraph.modulegraph">PyInstaller.lib.modulegraph.modulegraph</a>
  &#8226;   <a href="#ctypes.util">ctypes.util</a>
  &#8226;   <a href="#imp">imp</a>
+ &#8226;   <a href="#importlib">importlib</a>
  &#8226;   <a href="#importlib.abc">importlib.abc</a>
  &#8226;   <a href="#inspect">inspect</a>
  &#8226;   <a href="#numpy.compat.py3k">numpy.compat.py3k</a>
@@ -32345,6 +32339,7 @@ imports:
  &#8226;   <a href="#pygments.styles.vs">pygments.styles.vs</a>
  &#8226;   <a href="#pygments.styles.xcode">pygments.styles.xcode</a>
  &#8226;   <a href="#pygments.styles.zenburn">pygments.styles.zenburn</a>
+ &#8226;   <a href="#pygments.unistring">pygments.unistring</a>
 
   </div>
   <div class="import">
@@ -32977,6 +32972,9 @@ imports:
  &#8226;   <a href="#pygments.lexers.PrologLexer">pygments.lexers.PrologLexer</a>
  &#8226;   <a href="#pygments.lexers._mapping">pygments.lexers._mapping</a>
  &#8226;   <a href="#pygments.lexers._mql_builtins">pygments.lexers._mql_builtins</a>
+ &#8226;   <a href="#pygments.lexers._scilab_builtins">pygments.lexers._scilab_builtins</a>
+ &#8226;   <a href="#pygments.lexers._stan_builtins">pygments.lexers._stan_builtins</a>
+ &#8226;   <a href="#pygments.lexers._vbscript_builtins">pygments.lexers._vbscript_builtins</a>
  &#8226;   <a href="#pygments.modeline">pygments.modeline</a>
  &#8226;   <a href="#pygments.plugin">pygments.plugin</a>
  &#8226;   <a href="#pygments.util">pygments.util</a>
@@ -33560,6 +33558,7 @@ imports:
   <div class="import">
 imported by:
     <a href="#pygments">pygments</a>
+ &#8226;   <a href="#pygments.lexers">pygments.lexers</a>
  &#8226;   <a href="#pygments.lexers.matlab">pygments.lexers.matlab</a>
 
   </div>
@@ -33598,6 +33597,7 @@ imports:
   <div class="import">
 imported by:
     <a href="#pygments">pygments</a>
+ &#8226;   <a href="#pygments.lexers">pygments.lexers</a>
  &#8226;   <a href="#pygments.lexers.modeling">pygments.lexers.modeling</a>
 
   </div>
@@ -33666,6 +33666,7 @@ imports:
   <div class="import">
 imported by:
     <a href="#pygments">pygments</a>
+ &#8226;   <a href="#pygments.lexers">pygments.lexers</a>
  &#8226;   <a href="#pygments.lexers.basic">pygments.lexers.basic</a>
 
   </div>
@@ -38642,7 +38643,8 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#pygments.lexers.dotnet">pygments.lexers.dotnet</a>
+    <a href="#pygments">pygments</a>
+ &#8226;   <a href="#pygments.lexers.dotnet">pygments.lexers.dotnet</a>
  &#8226;   <a href="#pygments.lexers.futhark">pygments.lexers.futhark</a>
  &#8226;   <a href="#pygments.lexers.haskell">pygments.lexers.haskell</a>
  &#8226;   <a href="#pygments.lexers.javascript">pygments.lexers.javascript</a>

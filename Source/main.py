@@ -1,5 +1,4 @@
 import os.path
-from config import num_threads_settings
 import eyed3
 from youtubesearchpython import VideosSearch
 from tqdm import tqdm
@@ -18,6 +17,8 @@ from queue import Queue
 import random
 
 th_errors = []
+
+num_threads_max = 8
 
 
 def youtube_music_download():
@@ -60,7 +61,7 @@ def youtube_playlist_download():
     p = Playlist(playlist_name)
 
     q = Queue(maxsize=0)
-    num_threads = min(num_threads_settings, len(p))
+    num_threads = min(num_threads_max, len(p))
     pbar = tqdm(p.videos, desc="Downloading")
 
     def crawl(que):
@@ -70,6 +71,7 @@ def youtube_playlist_download():
                 work[0].streams.get_highest_resolution().download(output_path="./YT-Playlists/" + p.title)
 
             except:
+                global th_errors
                 th_errors.append(random.seed(5))
 
         pbar.update(1)
@@ -121,7 +123,7 @@ def spotify_playlist_download():
         result = requests.get(url=url, headers=headers).json()
 
     q = Queue(maxsize=0)
-    num_threads = min(num_threads_settings, len(result_output))
+    num_threads = min(num_threads_max, len(result_output))
     pbar = tqdm(result_output, desc="Downloading")
 
     def crawl(que):
@@ -179,6 +181,7 @@ def spotify_playlist_download():
                 os.remove(audio_cover)
 
             except:
+                global th_errors
                 th_errors.append(random.seed(5))
 
             pbar.update(1)
@@ -195,25 +198,58 @@ def spotify_playlist_download():
 
 
 # Prompt
-questions = [
-    {
-        "type": "list",
-        "message": "Platform",
-        "choices": ["YouTube Video", "YouTube Music", "YouTube Playlist", "Spotify"],
-    },
-]
+def main_prompt():
+    def clear():
+        os.system("cls")
 
-answer = prompt(questions)
+    clear()
+    print('\u001b[36m' + r""" 
+  ____                      _                 _           
+ |  _ \  _____      ___ __ | | __ _  ___   __| | ___ _ __ 
+ | | | |/ _ \ \ /\ / / '_ \| |/ _` |/ _ \ / _` |/ _ \ '__|
+ | |_| | (_) \ V  V /| | | | | (_| | (_) | (_| |  __/ |   
+ |____/ \___/ \_/\_/ |_| |_|_|\__,_|\___/ \__,_|\___|_|   
+                                                           """)
+    questions = [
+        {
+            "type": "list",
+            "message": "Platform " + "(Threads " + str(num_threads_max) + ")",
+            "choices": ["YouTube Video", "YouTube Music", "YouTube Playlist", "Spotify", "Settings"],
+        },
+    ]
+    answer = prompt(questions)
 
-if "Spotify" in answer[0]:
-    spotify_playlist_download()
-elif "YouTube Video" in answer[0]:
-    youtube_video_download()
-elif "YouTube Music" in answer[0]:
-    youtube_music_download()
-elif "YouTube Playlist" in answer[0]:
-    youtube_playlist_download()
+    if "Spotify" in answer[0]:
+        spotify_playlist_download()
+    elif "YouTube Video" in answer[0]:
+        youtube_video_download()
+    elif "YouTube Music" in answer[0]:
+        youtube_music_download()
+    elif "YouTube Playlist" in answer[0]:
+        youtube_playlist_download()
+    elif "Settings" in answer[0]:
+        setting_prompt()
 
+
+def setting_prompt():
+    def clear(): os.system("cls")
+
+    clear()
+    questions = [
+
+        {"type": "input", "message": "Number Of Threads", "name": "name"},
+
+    ]
+    answer = prompt(questions)
+
+    if answer["name"].isdigit():
+        global num_threads_max
+        num_threads_max = answer["name"]
+
+    main_prompt()
+
+
+main_prompt()
 print('\u001b[31m' + "Errors: " + str(len(th_errors)))
 print('\u001b[32m' + "Download completed")
 print('\u001b[31m' + "Close")
