@@ -13,8 +13,8 @@ from eyed3.id3.frames import ImageFrame
 from eyed3.core import Date
 from threading import Thread
 from queue import Queue
+import time
 
-import random
 
 th_errors = []
 
@@ -40,9 +40,9 @@ def convert_mp4_mp3(song):
     base, ext = os.path.splitext(song)
     new_file = base + ".mp3"
     audio_clip.write_audiofile(new_file, logger=None)
+
     audio_clip.close()
     video_clip.close()
-    os.remove(song)
 
     return new_file
 
@@ -65,14 +65,16 @@ def youtube_playlist_download():
     pbar = tqdm(p.videos, desc="Downloading")
 
     def crawl(que):
-        while not que.empty():
+        while True:
+            time.sleep(0.1)
             try:
-                work = que.get()
+                work = que.get_nowait()
                 work[0].streams.get_highest_resolution().download(output_path="./YT-Playlists/" + p.title)
 
-            except:
+            except Exception as es:
                 global th_errors
-                th_errors.append(random.seed(5))
+                th_errors.append(es)
+                break
             finally:
                 pbar.update(1)
                 que.task_done()
@@ -87,9 +89,9 @@ def youtube_playlist_download():
     q.join()
 
 
-def create_threads(threads, crawl_f, que):
+def create_threads(threads, crawl_f, que_f):
     for y in range(threads):
-        worker = Thread(target=crawl_f, args=(que,))
+        worker = Thread(target=crawl_f, args=(que_f,))
         worker.setDaemon(True)
         worker.start()
 
@@ -128,10 +130,10 @@ def spotify_playlist_download():
     pbar = tqdm(result_output, desc="Downloading")
 
     def crawl(que):
-
-        while not que.empty():
+        while True:
+            time.sleep(0.1)
             try:
-                work = que.get()
+                work = que.get_nowait()
                 song_name = re.sub(r'[/?.<>|"\\*]', ' ', work[0]['track']['name'])
                 artist_name = []
                 playlist_artist_name = []
@@ -180,10 +182,12 @@ def spotify_playlist_download():
 
                 audio_file.tag.save()
                 os.remove(audio_cover)
+                os.remove(song)
 
-            except:
+            except Exception as es:
                 global th_errors
-                th_errors.append(random.seed(5))
+                th_errors.append(es)
+                break
 
             finally:
                 pbar.update(1)
@@ -197,6 +201,7 @@ def spotify_playlist_download():
     create_threads(num_threads, crawl, q)
 
     q.join()
+    print(q.unfinished_tasks)
 
 
 # Prompt
